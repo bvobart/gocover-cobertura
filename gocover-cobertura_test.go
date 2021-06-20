@@ -8,13 +8,11 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/bvobart/gocover-cobertura/cobertura"
 )
 
 const SaveTestResults = false
-
-type dirInfo struct {
-	PkgPath string
-}
 
 func TestMain(t *testing.T) {
 	fname := filepath.Join(os.TempDir(), "stdout")
@@ -67,7 +65,7 @@ func TestConvertEmpty(t *testing.T) {
 	pipe2rd, pipe2wr := io.Pipe()
 	go convert(strings.NewReader(data), pipe2wr)
 
-	v := Coverage{}
+	v := cobertura.Coverage{}
 	dec := xml.NewDecoder(pipe2rd)
 	dec.Decode(&v)
 
@@ -79,36 +77,6 @@ func TestConvertEmpty(t *testing.T) {
 	}
 	if v.Packages != nil {
 		t.Fatal()
-	}
-}
-
-func TestParseProfileDoesntExist(t *testing.T) {
-	v := Coverage{}
-	profile := Profile{FileName: "does-not-exist"}
-	err := v.parseProfile(&profile)
-	if err == nil || !strings.Contains(err.Error(), `can't find "does-not-exist"`) {
-		t.Fatalf("Expected \"can't find\" error; got: %+v", err)
-	}
-}
-
-func TestParseProfileNotReadable(t *testing.T) {
-	v := Coverage{}
-	profile := Profile{FileName: os.DevNull}
-	err := v.parseProfile(&profile)
-	if err == nil || !strings.Contains(err.Error(), `expected 'package', found 'EOF'`) {
-		t.Fatalf("Expected \"expected 'package', found 'EOF'\" error; got: %+v", err)
-	}
-}
-
-func TestParseProfilePermissionDenied(t *testing.T) {
-	tmpfile, err := ioutil.TempFile("", "not-readable")
-	defer os.Remove(tmpfile.Name())
-	tmpfile.Chmod(000)
-	v := Coverage{}
-	profile := Profile{FileName: tmpfile.Name()}
-	err = v.parseProfile(&profile)
-	if err == nil || !strings.Contains(err.Error(), `permission denied`) {
-		t.Fatalf("Expected \"permission denied\" error; got: %+v", err)
 	}
 }
 
@@ -132,7 +100,7 @@ func TestConvertSetMode(t *testing.T) {
 
 	go convert(pipe1rd, convwr)
 
-	v := Coverage{}
+	v := cobertura.Coverage{}
 	dec := xml.NewDecoder(pipe2rd)
 	dec.Decode(&v)
 
@@ -178,7 +146,7 @@ func TestConvertSetMode(t *testing.T) {
 		t.Errorf("Expected 4 lines but got %d", len(c.Lines))
 	}
 
-	var l *Line
+	var l *cobertura.Line
 	if l = m.Lines[0]; l.Number != 4 || l.Hits != 1 {
 		t.Errorf("unmatched line: Number:%d, Hits:%d", l.Number, l.Hits)
 	}

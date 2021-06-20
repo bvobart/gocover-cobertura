@@ -4,16 +4,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package main
+package gocover
 
 import (
 	"bufio"
 	"fmt"
-	"go/build"
 	"io"
 	"math"
-	"os"
-	"path/filepath"
 	"regexp"
 	"sort"
 	"strconv"
@@ -183,20 +180,4 @@ func (b boundariesByPos) Less(i, j int) bool {
 		return !b[i].Start && b[j].Start
 	}
 	return b[i].Offset < b[j].Offset
-}
-
-// findFile finds the location of the named file in GOROOT, GOPATH etc.
-func findFile(file string) (string, error) {
-	if strings.HasPrefix(file, "_") {
-		file = file[1:]
-	}
-	if _, err := os.Stat(file); err == nil {
-		return file, nil
-	}
-	dir, file := filepath.Split(file)
-	pkg, err := build.Import(dir, ".", build.FindOnly)
-	if err != nil {
-		return "", fmt.Errorf("can't find %q: %v", file, err)
-	}
-	return filepath.Join(pkg.Dir, file), nil
 }
