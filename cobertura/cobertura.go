@@ -119,18 +119,12 @@ func (class Class) HitRate() float32 {
 
 // NumLines returns the number of lines
 func (class Class) NumLines() (numLines int64) {
-	for _, method := range class.Methods {
-		numLines += method.NumLines()
-	}
-	return numLines
+	return class.Lines.NumLines()
 }
 
 // NumLinesWithHits returns the number of lines with a hit count > 0
 func (class Class) NumLinesWithHits() (numLinesWithHits int64) {
-	for _, method := range class.Methods {
-		numLinesWithHits += method.NumLinesWithHits()
-	}
-	return numLinesWithHits
+	return class.Lines.NumLinesWithHits()
 }
 
 // HitRate returns a float32 from 0.0 to 1.0 representing what fraction of lines
